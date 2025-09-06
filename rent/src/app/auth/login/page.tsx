@@ -4,29 +4,18 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
+import { toast } from "sonner"; // Import toast from sonner
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-// If your toast hook is located elsewhere, update the path accordingly.
-// Example: If it's at '@/components/use-toast', use:
-import { toast } from "sonner";
-// Or, if you have not created it yet, you need to implement the useToast hook or install the required package.
 
 axios.defaults.withCredentials = true;
 
 export default function LoginPage() {
-  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  // toast is now imported directly from 'sonner'
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -36,53 +25,59 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await axios.post("http://localhost:5000/api/auth/login", formData);
-      toast("Login Successful. Welcome back!");
-      router.push("/");
-      router.refresh(); // This helps the navbar update its state
+      const response = await axios.post("http://localhost:5000/api/auth/login", formData);
+      const data = response.data as { name: string; role: string }; // Type assertion
+
+      // Use the new toast syntax from sonner
+      toast.success("Login Successful!", {
+        description: `Welcome back, ${data.name}!`,
+      });
+      
+      if (data.role === 'seller') {
+        router.push('/seller/dashboard');
+      } else {
+        router.push('/user/dashboard');
+      }
     } catch (err: any) {
-      toast(
-        err.response?.data?.message || "Login Failed. Please check your credentials."
-      );
-      // If you want to use toast.error for error styling:
-      // toast.error(err.response?.data?.message || "Login Failed. Please check your credentials.");
+      // Use the new error toast syntax
+      toast.error("Login Failed", {
+        description: err.response?.data?.message || 'Please check your credentials.',
+      });
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
-          <CardDescription>
-            Enter your email below to login to your account.
-          </CardDescription>
+    <div className="flex items-center justify-center py-12">
+      <Card className="mx-auto max-w-md w-full">
+        <CardHeader className="text-center">
+          <CardTitle className="text-3xl font-bold">Welcome Back</CardTitle>
+          <CardDescription className="text-md">Enter your email to log in to your account.</CardDescription>
         </CardHeader>
-        <form onSubmit={handleSubmit}>
-          <CardContent className="grid gap-4">
-            <div className="grid gap-2">
+        <CardContent>
+          <form onSubmit={handleSubmit} className="grid gap-4">
+            <div className="grid gap-2 text-left">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" name="email" placeholder="m@example.com" required onChange={handleChange} />
+              <Input id="email" name="email" type="email" placeholder="you@example.com" required onChange={handleChange} className="h-10"/>
             </div>
-            <div className="grid gap-2">
+            <div className="grid gap-2 text-left">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" name="password" required onChange={handleChange} />
+              <Input id="password" name="password" type="password" required onChange={handleChange} className="h-10"/>
             </div>
-          </CardContent>
-          <CardFooter className="flex flex-col">
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Signing In..." : "Sign In"}
+            <Button type="submit" className="w-full h-11 text-md mt-2" disabled={isLoading}>
+              {isLoading ? "Logging In..." : "Log In"}
             </Button>
-            <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account?{" "}
-              <Link href="/auth/signup" className="underline">
-                Sign up
-              </Link>
-            </div>
-          </CardFooter>
-        </form>
+          </form>
+          <div className="mt-4 text-center text-sm">
+            Don&apos;t have an account?{" "}
+            <Link href="/auth/signup" className="underline">
+              Sign up
+            </Link>
+          </div>
+        </CardContent>
       </Card>
     </div>
   );
 }
+
