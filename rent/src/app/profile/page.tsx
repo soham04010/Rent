@@ -3,44 +3,44 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-// Update the import path below to the correct relative path if use-toast exists in your project structure.
-// Example: import { useToast } from "../../components/ui/use-toast";
-// import { useToast } from "@/components/ui/use-toast";
-// Update the path below to the correct relative path if use-toast exists in your project structure.
-// Example: import { useToast } from "../../components/ui/use-toast";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 
 axios.defaults.withCredentials = true;
+const API_BASE_URL = "http://localhost:5000";
+
+interface UserProfile {
+  name: string;
+  email: string;
+  avatar: string;
+  role: string;
+}
 
 export default function ProfilePage() {
-  const [user, setUser] = useState({ name: "", email: "" });
-  const [password, setPassword] = useState("");
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isUpdating, setIsUpdating] = useState(false);
   const router = useRouter();
-  const { toast } = useToast();
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const { data } = await axios.get("http://localhost:5000/api/auth/profile");
-        const profile = data as { name: string; email: string };
-        setUser({ name: profile.name, email: profile.email });
+        const { data } = await axios.get<UserProfile>(`${API_BASE_URL}/api/auth/profile`);
+        setUser(data as UserProfile);
       } catch (error) {
-        toast({
-          title: "Not Authenticated",
-          description: "Please login to view your profile.",
-          variant: "destructive",
+        toast.error("Not Authorized", {
+          description: "Please log in to view your profile.",
         });
         router.push("/auth/login");
       } finally {
@@ -48,57 +48,53 @@ export default function ProfilePage() {
       }
     };
     fetchProfile();
-  }, [router, toast]);
+  }, [router]);
 
   const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsUpdating(true);
+    if (!user) return;
+    
     try {
-      const updateData: { name: string, email: string, password?: string } = {
+      const { data } = await axios.put(`${API_BASE_URL}/api/auth/profile`, {
         name: user.name,
         email: user.email,
-      };
-      if (password) {
-        updateData.password = password;
-      }
-      await axios.put("http://localhost:5000/api/auth/profile", updateData);
-      toast({
-        title: "Success",
-        description: "Your profile has been updated.",
+        // In a real app, you'd handle image uploads and get a new URL here
+        // For now, we'll just re-save the existing avatar URL
+        avatar: user.avatar,
       });
-      setPassword("");
-    } catch (error) {
-      toast({
-        title: "Update Failed",
-        description: "Could not update your profile.",
-        variant: "destructive",
+      setUser(data as UserProfile);
+      toast.success("Profile Updated", {
+        description: "Your information has been successfully saved.",
       });
-    } finally {
-      setIsUpdating(false);
+    } catch (err: any) {
+      toast.error("Update Failed", {
+        description: err.response?.data?.message || "An error occurred.",
+      });
     }
   };
 
-  if (isLoading) {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (user) {
+      setUser({ ...user, [e.target.name]: e.target.value });
+    }
+  };
+  
+  const getInitials = (name: string = "") => {
+    const names = name.split(' ');
+    if (names.length > 1) {
+      return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
+
+  if (isLoading || !user) {
     return (
-        <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
-            <Card className="w-full max-w-md">
-                <CardHeader>
-                    <Skeleton className="h-8 w-1/2" />
-                    <Skeleton className="h-4 w-3/4" />
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                        <Skeleton className="h-4 w-1/4" />
-                        <Skeleton className="h-10 w-full" />
-                    </div>
-                    <div className="space-y-2">
-                        <Skeleton className="h-4 w-1/4" />
-                        <Skeleton className="h-10 w-full" />
-                    </div>
-                    <div className="space-y-2">
-                        <Skeleton className="h-4 w-1/4" />
-                        <Skeleton className="h-10 w-full" />
-                    </div>
+        <div className="flex justify-center py-12">
+            <Card className="w-full max-w-3xl">
+                <CardHeader><Skeleton className="h-8 w-1/2" /></CardHeader>
+                <CardContent className="space-y-6">
+                    <Skeleton className="h-24 w-24 rounded-full" />
+                    <Skeleton className="h-10 w-full" />
                     <Skeleton className="h-10 w-full" />
                 </CardContent>
             </Card>
@@ -107,38 +103,48 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
-      <Card className="w-full max-w-md">
+    <div className="flex justify-center py-12">
+      <Card className="w-full max-w-3xl">
         <CardHeader>
-          <CardTitle>Your Profile</CardTitle>
+          <CardTitle className="text-2xl">User Profile</CardTitle>
           <CardDescription>
-            Update your personal information here.
+            Manage your account settings and personal information.
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleUpdate}>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
-              <Input id="name" value={user.name} onChange={(e) => setUser({ ...user, name: e.target.value })} />
+          <CardContent className="space-y-6">
+            <div className="flex items-center space-x-6">
+              <Avatar className="h-24 w-24">
+                <AvatarImage src={user.avatar} alt={user.name} />
+                <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+              </Avatar>
+              <div className="flex-grow">
+                 <Label htmlFor="avatar-upload">Profile Photo</Label>
+                 {/* This is a placeholder for file upload UI */}
+                 <Input id="avatar-upload" type="file" disabled className="mt-2" />
+                 <p className="text-xs text-muted-foreground mt-2">
+                    PNG, JPG, GIF up to 10MB. (Upload functionality coming soon).
+                 </p>
+              </div>
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" value={user.email} onChange={(e) => setUser({ ...user, email: e.target.value })} />
+              <Label htmlFor="name">Full Name</Label>
+              <Input id="name" name="name" value={user.name} onChange={handleChange} />
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="password">New Password</Label>
-              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Leave blank to keep current password" />
+              <Label htmlFor="email">Email Address</Label>
+              <Input id="email" name="email" type="email" value={user.email} onChange={handleChange} />
             </div>
-            <Button type="submit" className="w-full" disabled={isUpdating}>
-              {isUpdating ? "Saving..." : "Save Changes"}
-            </Button>
           </CardContent>
+          <CardFooter className="border-t px-6 py-4 flex justify-between">
+            <Button type="submit">Save Changes</Button>
+             <Button variant="destructive" type="button">Delete Account</Button>
+          </CardFooter>
         </form>
       </Card>
     </div>
   );
-}
-function useToast(): { toast: any; } {
-    throw new Error("Function not implemented.");
 }
 

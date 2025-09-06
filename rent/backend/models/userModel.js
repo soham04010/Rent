@@ -5,12 +5,19 @@ const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true, lowercase: true },
   password: { type: String, required: true },
-  // You can add more fields here later, like address, phone number, etc.
+  // This field is the differentiator
+  role: {
+    type: String,
+    enum: ['user', 'seller'], // The role must be one of these two values
+    required: true,
+  },
+  avatar: {
+    type: String,
+    default: 'https://placehold.co/200x200/EFEFEF/AAAAAA&text=Avatar', // A default placeholder
+  }
 }, { timestamps: true });
 
-// --- Mongoose Middleware ---
-
-// Before saving a new user, hash their password
+// --- Mongoose Middleware (hashes password before saving) ---
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
     return next();
@@ -20,9 +27,7 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
-// --- Mongoose Methods ---
-
-// Method to compare an entered password with the stored hashed password
+// --- Mongoose Methods (compares passwords for login) ---
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
@@ -30,3 +35,4 @@ userSchema.methods.matchPassword = async function (enteredPassword) {
 const User = mongoose.model('User', userSchema);
 
 export default User;
+
