@@ -34,9 +34,9 @@ export default function LoginPage() {
       });
       
       if (data.role === 'seller') {
-        router.push('/seller/dashboard');
+        router.push('/seller_dashboard');
       } else {
-        router.push('/user/dashboard');
+        router.push('/users_dashboard');
       }
     } catch (err: any) {
       // Use the new error toast syntax

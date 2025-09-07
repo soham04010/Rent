@@ -13,8 +13,16 @@ const userSchema = new mongoose.Schema({
   },
   avatar: {
     type: String,
-    default: 'https://placehold.co/200x200/EFEFEF/AAAAAA&text=Avatar', // A default placeholder
-  }
+    default: 'https://static.vecteezy.com/system/resources/thumbnails/009/292/244/small/default-avatar-icon-of-social-media-user-vector.jpg', // A default placeholder
+  },
+  address: {
+    type: String,
+    default: '',
+  },
+  phone: {
+    type: String,
+    default: '',
+  },
 }, { timestamps: true });
 
 // --- Mongoose Middleware (hashes password before saving) ---

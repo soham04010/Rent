@@ -84,6 +84,8 @@ export const updateUserProfile = async (req, res) => {
         user.name = req.body.name || user.name;
         user.email = req.body.email || user.email;
         user.avatar = req.body.avatar || user.avatar; // Update avatar URL
+        user.address = req.body.address || user.address;
+        user.phone = req.body.phone || user.phone;
 
         if (req.body.password) {
             // The pre-save hook in userModel will automatically hash it
@@ -99,6 +101,8 @@ export const updateUserProfile = async (req, res) => {
             email: updatedUser.email,
             role: updatedUser.role,
             avatar: updatedUser.avatar,
+            address: updatedUser.address,
+            phone: updatedUser.phone,
         });
     } else {
         res.status(404).json({ message: 'User not found' });
