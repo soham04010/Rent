@@ -5,6 +5,8 @@ import Product from '../models/productModel.js';
 // @access  Public
 export const getProducts = async (req, res) => {
   try {
+    // --- THIS IS THE FIX ---
+    // Only find products where isAvailable is true.
     const products = await Product.find({ isAvailable: true }).populate('owner', 'name');
     res.status(200).json(products);
   } catch (error) {
