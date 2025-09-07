@@ -34,7 +34,6 @@ export const getMyBookings = async (req, res) => {
   try {
     const bookings = await Booking.find({ customer: req.user._id })
       .populate('product', 'name imageUrl')
-      // --- FIX: Populate the seller with their name and _id ---
       .populate('seller', 'name _id'); 
     res.json(bookings);
   } catch (error) {
@@ -49,7 +48,6 @@ export const getSellerBookings = async (req, res) => {
     try {
         const bookings = await Booking.find({ seller: req.user._id })
             .populate('product', 'name')
-            // --- FIX: Populate the customer with their name and _id ---
             .populate('customer', 'name email _id');
         res.json(bookings);
     } catch(error) {
@@ -63,6 +61,9 @@ export const getSellerBookings = async (req, res) => {
 export const updateBookingStatus = async (req, res) => {
     const { status } = req.body;
     try {
+        // --- DEBUGGING CHECKPOINT 1 ---
+        console.log(`Attempting to update booking ${req.params.id} to status: ${status}`);
+
         const booking = await Booking.findById(req.params.id);
 
         if (booking) {
@@ -70,12 +71,28 @@ export const updateBookingStatus = async (req, res) => {
                 return res.status(401).json({ message: "Not authorized" });
             }
             booking.status = status;
+
+            // --- DEBUGGING CHECKPOINT 2 ---
+            console.log(`Booking found. Product ID to update: ${booking.product}`);
+
+            if (status === 'approved') {
+                await Product.findByIdAndUpdate(booking.product, { isAvailable: false });
+                // --- DEBUGGING CHECKPOINT 3 ---
+                console.log(`Product ${booking.product} has been marked as UNAVAILABLE.`);
+            } 
+            else if (status === 'declined' || status === 'completed') {
+                await Product.findByIdAndUpdate(booking.product, { isAvailable: true });
+                // --- DEBUGGING CHECKPOINT 3 ---
+                console.log(`Product ${booking.product} has been marked as AVAILABLE.`);
+            }
+
             const updatedBooking = await booking.save();
             res.json(updatedBooking);
         } else {
             res.status(404).json({ message: 'Booking not found' });
         }
     } catch(error) {
+        console.error(error);
         res.status(500).json({ message: 'Server Error' });
     }
 };

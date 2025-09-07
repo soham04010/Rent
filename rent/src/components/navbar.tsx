@@ -80,6 +80,14 @@ export function Navbar() {
             >
               Products
             </Link>
+            {/* --- NEW: Link to How It Works --- */}
+          <Link href="/how-it-works" className="transition-colors hover:text-foreground/80 text-foreground/60">
+            How It Works
+          </Link>
+           {/* --- NEW: Link to Contact Us --- */}
+          <Link href="/contact" className="transition-colors hover:text-foreground/80 text-foreground/60">
+            Contact Us
+          </Link>
           </nav>
         </div>
         <div className="flex flex-1 items-center justify-end space-x-4">
