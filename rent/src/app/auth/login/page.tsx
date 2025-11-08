@@ -4,18 +4,31 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
-import { toast } from "sonner"; // Import toast from sonner
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useUserStore } from "@/stores/useUserStore"; // --- 1. Import the global store ---
 
 axios.defaults.withCredentials = true;
+
+// Define the shape of the user data we expect back
+interface UserData {
+  _id: string;
+  name: string;
+  email: string;
+  role: "user" | "seller";
+  avatar?: string;
+}
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  
+  // --- 2. Get the 'setUser' function from the store ---
+  const { setUser } = useUserStore();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -25,21 +38,25 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await axios.post("https://rental-app-backend-wk4u.onrender.com/api/auth/login", formData);
-      const data = response.data as { name: string; role: string }; // Type assertion
+      // Get the full user data back from the API
+      const { data } = await axios.post<UserData>("https://rental-app-backend-wk4u.onrender.com/api/auth/login", formData);
 
-      // Use the new toast syntax from sonner
+      // --- 3. THIS IS THE FIX ---
+      // Update the global store with the new user data.
+      // The Navbar will see this change and update instantly.
+      setUser(data);
+      // --- END OF FIX ---
+
       toast.success("Login Successful!", {
         description: `Welcome back, ${data.name}!`,
       });
       
       if (data.role === 'seller') {
-        router.push('/seller_dashboard');
+        router.push('/seller/dashboard'); // Corrected path
       } else {
-        router.push('/users_dashboard');
+        router.push('/customer/dashboard'); // Corrected path
       }
     } catch (err: any) {
-      // Use the new error toast syntax
       toast.error("Login Failed", {
         description: err.response?.data?.message || 'Please check your credentials.',
       });
@@ -80,4 +97,3 @@ export default function LoginPage() {
     </div>
   );
 }
-

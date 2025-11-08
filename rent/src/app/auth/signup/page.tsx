@@ -4,19 +4,32 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
-import { toast } from "sonner"; // Import toast from sonner
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useUserStore } from "@/stores/useUserStore"; // --- 1. Import the global store ---
 
 axios.defaults.withCredentials = true;
+
+// Define the shape of the user data we expect back
+interface UserData {
+  _id: string;
+  name: string;
+  email: string;
+  role: "user" | "seller";
+  avatar?: string;
+}
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'user' });
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  
+  // --- 2. Get the 'setUser' function from the store ---
+  const { setUser } = useUserStore();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -30,11 +43,26 @@ export default function SignupPage() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await axios.post("https://rental-app-backend-wk4u.onrender.com/api/auth/signup", formData);
+      // Get the full user data back from the API
+      const { data } = await axios.post<UserData>("https://rental-app-backend-wk4u.onrender.com/api/auth/signup", formData);
+      
+      // --- 3. THIS IS THE FIX ---
+      // Update the global store with the new user data.
+      // The Navbar will see this change and update instantly.
+      setUser(data);
+      // --- END OF FIX ---
+
       toast.success("Account Created!", {
-        description: "Welcome! You have been successfully signed up.",
+        description: "Welcome! You are now logged in.",
       });
-      router.push('/');
+      
+      // Redirect to the correct dashboard
+      if (data.role === 'seller') {
+        router.push('/seller/dashboard'); // Corrected path
+      } else {
+        router.push('/customer/dashboard'); // Corrected path
+      }
+
     } catch (err: any) {
       toast.error("Signup Failed", {
         description: err.response?.data?.message || 'An unknown error occurred.',
