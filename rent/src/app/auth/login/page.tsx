@@ -25,7 +25,7 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await axios.post("http://localhost:5000/api/auth/login", formData);
+      const response = await axios.post("https://rental-app-backend-wk4u.onrender.com/api/auth/login", formData);
       const data = response.data as { name: string; role: string }; // Type assertion
 
       // Use the new toast syntax from sonner
