@@ -18,7 +18,7 @@ import { LayoutDashboard, LogOut, Package, Users, Compass, User as UserIcon, Mes
 import { useUserStore } from "@/stores/useUserStore";
 
 axios.defaults.withCredentials = true;
-const API_BASE_URL = "http://localhost:5000";
+const API_BASE_URL = "https://rental-app-backend-wk4u.onrender.com";
 
 type User = {
   name: string;
