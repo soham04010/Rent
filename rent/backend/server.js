@@ -17,27 +17,31 @@ dotenv.config();
 connectDB();
 
 const app = express();
-// --- ADDITION: Create an HTTP server from the Express app for Socket.IO ---
 const server = http.createServer(app); 
 
-// --- ADDITION: Initialize and attach Socket.IO to the HTTP server ---
-initializeSocket(server);
+// --- THIS IS THE FIX ---
+// Allow the server to accept connections from your live Vercel site
+const clientURL = process.env.CLIENT_URL || 'http://localhost:3000';
+
+// --- PASS THE URL TO SOCKET.IO ---
+initializeSocket(server, clientURL); // Pass the clientURL to the socket initializer
 
 // Middleware
-// Configure CORS to allow requests from your frontend and to handle cookies
 app.use(cors({
-  origin: 'http://localhost:3000', // The address of your React frontend
-  credentials: true, // This allows cookies to be sent
+  origin: clientURL, // Use the new variable here
+  credentials: true,
 }));
-app.use(express.json()); // Allows parsing of JSON request bodies
-app.use(express.urlencoded({ extended: true })); // Allows parsing of form data
-app.use(cookieParser()); // Allows parsing of cookies
+// --- END OF FIX ---
+
+app.use(express.json()); 
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/products', productRoutes);
-app.use('/api/chat', chatRoutes); // ADDITION: Use the chat routes
+app.use('/api/chat', chatRoutes);
 
 // Basic route for testing
 app.get('/', (req, res) => {
@@ -46,6 +50,4 @@ app.get('/', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-// --- CHANGE: Start the server using the http instance, not the express app ---
 server.listen(PORT, () => console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`));
-
