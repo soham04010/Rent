@@ -30,7 +30,7 @@ export default function SignupPage() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await axios.post("http://localhost:5000/api/auth/signup", formData);
+      await axios.post("https://rental-app-backend-wk4u.onrender.com/api/auth/signup", formData);
       toast.success("Account Created!", {
         description: "Welcome! You have been successfully signed up.",
       });

@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 axios.defaults.withCredentials = true;
-const API_BASE_URL = "http://localhost:5000";
+const API_BASE_URL = "https://rental-app-backend-wk4u.onrender.com";
 
 export default function AddProductPage() {
   const [formData, setFormData] = useState({ name: '', description: '', pricePerDay: '', category: '', location: '' });

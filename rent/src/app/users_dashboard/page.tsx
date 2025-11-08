@@ -11,7 +11,7 @@ import { format } from "date-fns";
 import Link from "next/link";
 
 axios.defaults.withCredentials = true;
-const API_BASE_URL = "http://localhost:5000";
+const API_BASE_URL = "https://rental-app-backend-wk4u.onrender.com";
 
 interface Booking {
     _id: string;

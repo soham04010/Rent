@@ -20,7 +20,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 // This default is for OUR backend API
 axios.defaults.withCredentials = true;
-const API_BASE_URL = "http://localhost:5000";
+const API_BASE_URL = "https://rental-app-backend-wk4u.onrender.com";
 
 interface UserProfile {
   name: string;
