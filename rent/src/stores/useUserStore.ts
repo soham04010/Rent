@@ -1,23 +1,18 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
-// The User interface used across the application
 interface User {
-  _id: string; // --- THIS IS THE FIX ---
   name: string;
   email: string;
-  role: 'user' | 'seller';
+  role: "user" | "seller";
   avatar?: string;
 }
 
-// The state structure for our store
-interface UserState {
+interface UserStore {
   user: User | null;
   setUser: (user: User | null) => void;
 }
 
-// This creates our global store.
-export const useUserStore = create<UserState>((set) => ({
+export const useUserStore = create<UserStore>((set) => ({
   user: null,
   setUser: (user) => set({ user }),
 }));
-

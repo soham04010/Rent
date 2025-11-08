@@ -23,10 +23,10 @@ interface UserData {
 }
 
 export default function LoginPage() {
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  
+
   // --- 2. Get the 'setUser' function from the store ---
   const { setUser } = useUserStore();
 
@@ -37,28 +37,35 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
+
     try {
-      // Get the full user data back from the API
-      const { data } = await axios.post<UserData>("https://rental-app-backend-wk4u.onrender.com/api/auth/login", formData);
+      // Send login request
+      const { data } = await axios.post(
+        "https://rental-app-backend-wk4u.onrender.com/api/auth/login",
+        formData
+      );
 
-      // --- 3. THIS IS THE FIX ---
-      // Update the global store with the new user data.
-      // The Navbar will see this change and update instantly.
-      setUser(data);
-      // --- END OF FIX ---
+      // --- FIX: handle both { user: {...} } and {...user fields...} response shapes ---
+      const userData: UserData = data.user ? data.user : data;
 
+      // Update Zustand global user store (Navbar will update instantly)
+      setUser(userData);
+
+      // Success toast
       toast.success("Login Successful!", {
-        description: `Welcome back, ${data.name}!`,
+        description: `Welcome back, ${userData.name}!`,
       });
-      
-      if (data.role === 'seller') {
-        router.push('/seller/dashboard'); // Corrected path
+
+      // --- Redirect based on role ---
+      if (userData.role === "seller") {
+        router.push("/seller_dashboard");
       } else {
-        router.push('/customer/dashboard'); // Corrected path
+        router.push("/users_dashboard");
       }
     } catch (err: any) {
       toast.error("Login Failed", {
-        description: err.response?.data?.message || 'Please check your credentials.',
+        description:
+          err.response?.data?.message || "Please check your credentials.",
       });
     } finally {
       setIsLoading(false);
@@ -70,19 +77,40 @@ export default function LoginPage() {
       <Card className="mx-auto max-w-md w-full">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold">Welcome Back</CardTitle>
-          <CardDescription className="text-md">Enter your email to log in to your account.</CardDescription>
+          <CardDescription className="text-md">
+            Enter your email to log in to your account.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="grid gap-4">
             <div className="grid gap-2 text-left">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" name="email" type="email" placeholder="you@example.com" required onChange={handleChange} className="h-10"/>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="you@example.com"
+                required
+                onChange={handleChange}
+                className="h-10"
+              />
             </div>
             <div className="grid gap-2 text-left">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" name="password" type="password" required onChange={handleChange} className="h-10"/>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                required
+                onChange={handleChange}
+                className="h-10"
+              />
             </div>
-            <Button type="submit" className="w-full h-11 text-md mt-2" disabled={isLoading}>
+            <Button
+              type="submit"
+              className="w-full h-11 text-md mt-2"
+              disabled={isLoading}
+            >
               {isLoading ? "Logging In..." : "Log In"}
             </Button>
           </form>
