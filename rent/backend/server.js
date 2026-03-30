@@ -20,7 +20,7 @@ const app = express();
 const server = http.createServer(app); 
 
 // --- ✅ FIXED CONFIGURATION STARTS HERE ---
-const clientURL = 'https://rental-app-backend-wk4u.onrender.com' || 'http://localhost:3000';
+const clientURL = process.env.CLIENT_URL || 'http://localhost:3000';
 
 // ✅ CORS setup (important for cookies to work across domains)
 app.use(
