@@ -15,7 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 
 axios.defaults.withCredentials = true;
-const API_BASE_URL = "https://rental-app-backend-wk4u.onrender.com";
+const API_BASE_URL = "https://rent-jb5j.onrender.com";
 
 // Define the structure of a product for this page
 interface Product {

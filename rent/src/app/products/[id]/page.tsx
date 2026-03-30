@@ -13,7 +13,7 @@ import { addDays } from "date-fns";
 import { Badge } from "@/components/ui/badge"; // Import the Badge component
 
 axios.defaults.withCredentials = true;
-const API_BASE_URL = "https://rental-app-backend-wk4u.onrender.com";
+const API_BASE_URL = "https://rent-jb5j.onrender.com";
 
 // ADDITION: Added the isAvailable field
 interface Product {
