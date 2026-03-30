@@ -123,6 +123,8 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:5000
 # Your Cloudinary Cloud Name
 NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name
 
+Thank You
+
 Challenges & Key Learnings
 A significant challenge during development was ensuring real-time state synchronization between separate components, such as updating the Navbar avatar instantly after a profile picture change. This was solved by implementing a global state management solution with Zustand, creating a single source of truth for user data and ensuring a seamless user experience across the application. This approach proved far more reliable than prop drilling or simple data re-fetching.
 
