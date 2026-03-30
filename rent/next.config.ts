@@ -24,6 +24,19 @@ const config: NextConfig = {
       },
     ],
   },
+
+  // --- THE PERMANENT CORS FIX FOR ALL ROUTES ---
+  async rewrites() {
+    return [
+      {
+        // The ':path*' wildcard catches everything after /api/
+        source: '/api/:path*',
+        // It invisibly forwards all of them to your Render backend
+        destination: 'https://rental-app-backend-wk4u.onrender.com/api/:path*',
+      },
+    ];
+  },
+  // --- END OF CORS FIX ---
 };
 
 export default config;
