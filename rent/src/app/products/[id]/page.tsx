@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge"; // Import the Badge component
 
 axios.defaults.withCredentials = true;
 const API_BASE_URL = "https://rent-jb5j.onrender.com";
-
+// Define the structure of a product for this page
 // ADDITION: Added the isAvailable field
 interface Product {
   _id: string;
