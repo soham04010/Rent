@@ -50,7 +50,7 @@ export default function SignupPage() {
     try {
       // Send signup request
       const { data } = await axios.post(
-        "https://rental-app-backend-wk4u.onrender.com/api/auth/signup",
+        "https://rent-jb5j.onrender.com/api/auth/signup",
         formData
       );
 

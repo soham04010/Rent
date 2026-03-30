@@ -41,7 +41,7 @@ export default function LoginPage() {
     try {
       // Send login request
       const { data } = await axios.post(
-        "https://rental-app-backend-wk4u.onrender.com/api/auth/login",
+        "https://rent-jb5j.onrender.com/api/auth/login",
         formData
       );
 

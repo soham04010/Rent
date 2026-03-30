@@ -13,7 +13,7 @@ import { Send } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
-const API_BASE_URL = "https://rental-app-backend-wk4u.onrender.com";
+const API_BASE_URL = "https://rent-jb5j.onrender.com";
 
 interface Message {
   _id: string;
